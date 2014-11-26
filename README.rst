@@ -12,9 +12,8 @@ Save/Load your options to/into config
 	>>> parser.add_argument('-t', action='store_true', default=False, dest='boolean_switch', help='Set a switch to true')
 	>>> parser.add_argument('-f', action='store_false', default=False, dest='boolean_switch', help='Set a switch to false')
 
-Generate simple config
+Generate simple config::
 
-.. code-block:: console
 	$ python script.py --gen-config
 	{
 	 "simple_value": null,
@@ -23,9 +22,9 @@ Generate simple config
 	 "boolean_switch": false
 	}
 
-And load it.
 
-.. code-block:: console
+And load it::
+
 	$ python argparse_config.py --gen-config > /tmp/test.json
 	$ python argparse_config.py --config=/tmp/test.json
 	{
@@ -35,5 +34,6 @@ And load it.
 	 "gen_config": false,
 	 "boolean_switch": false
 	}
+
 
 All another arguments overwrite the config values (but counter are added).
