@@ -1,9 +1,9 @@
-Argparse Config
-===============
+Arconfig
+========
 
 Save/Load your options to/into config
 
-	>>> from argparse_config import GenConfigAction, LoadConfigAction
+	>>> from arconfig import GenConfigAction, LoadConfigAction
 	>>> parser = argparse.ArgumentParser()
 	>>> parser.add_argument("--config", action=LoadConfigAction) # add it before another options
 	>>> parser.add_argument("--gen-config", action=GenConfigAction)
