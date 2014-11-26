@@ -8,9 +8,12 @@ Save/Load your options to/into config
 	>>> parser.add_argument("--config", action=LoadConfigAction) # add it before another options
 	>>> parser.add_argument("--gen-config", action=GenConfigAction)
 	>>> parser.add_argument('-s', action='store', dest='simple_value', help='Store a simple value')
-	>>> parser.add_argument('-c', action='store_const', dest='constant_value', const='value-to-store', help='Store a constant value')
-	>>> parser.add_argument('-t', action='store_true', default=False, dest='boolean_switch', help='Set a switch to true')
-	>>> parser.add_argument('-f', action='store_false', default=False, dest='boolean_switch', help='Set a switch to false')
+	>>> parser.add_argument('-c', action='store_const', dest='constant_value',
+	... const='value-to-store', help='Store a constant value')
+	>>> parser.add_argument('-t', action='store_true', default=False,
+	... dest='boolean_switch', help='Set a switch to true')
+	>>> parser.add_argument('-f', action='store_false', default=False,
+	... dest='boolean_switch', help='Set a switch to false')
 
 Generate simple config::
 
