@@ -14,6 +14,7 @@ Save/Load your options to/into config
 
 Generate simple config
 
+.. code-block:: console
 	$ python script.py --gen-config
 	{
 	 "simple_value": null,
@@ -24,6 +25,7 @@ Generate simple config
 
 And load it.
 
+.. code-block:: console
 	$ python argparse_config.py --gen-config > /tmp/test.json
 	$ python argparse_config.py --config=/tmp/test.json
 	{
