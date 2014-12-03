@@ -19,12 +19,19 @@ class GenConfigAction(argparse.Action):
 
         self._config = {}
 
+    def _default_or_value(self, ns, dest, default):
+        if getattr(ns, dest, None):
+            val = getattr(ns, dest)
+            return val if val else default
+        else:
+            return default
+
     def resolver(self, arg, ns):
-        if isinstance(arg, (argparse._HelpAction, argparse._VersionAction, self.__class__)):
+        if isinstance(arg, (argparse._HelpAction, argparse._VersionAction, self.__class__, GenConfigAction, LoadConfigAction)):
             pass
         elif isinstance(arg, (argparse._StoreAction, argparse._StoreConstAction, argparse._StoreTrueAction,
                               argparse._StoreFalseAction, argparse._CountAction,)):
-            self._config[arg.dest] = arg.default
+            self._config[arg.dest] = self._default_or_value(ns, arg.dest, arg.default)
         elif isinstance(arg, (argparse._AppendAction, argparse._AppendConstAction)):
             if arg.dest not in self._config:
                 self._config[arg.dest] = list()
@@ -32,7 +39,7 @@ class GenConfigAction(argparse.Action):
             if isinstance(arg, argparse._AppendConstAction):
                 self._config[arg.dest].append(arg.const)
             else:
-                self._config[arg.dest].append(arg.default)
+                self._config[arg.dest].append(self._default_or_value(ns, arg.dest, arg.default))
         elif isinstance(arg, (argparse._SubParsersAction)):
             pass
         else:
@@ -43,7 +50,7 @@ class GenConfigAction(argparse.Action):
         for o in parser._actions:
             self.resolver(o, ns)
 
-        print json.dumps(self._config, indent=True, encoding='utf-8')
+        print json.dumps(self._config, indent=True, encoding='utf-8', sort_keys=True)
         parser.exit()
 
 class LoadConfigAction(argparse._StoreAction):
@@ -78,4 +85,4 @@ if __name__ == "__main__":
 
     options = parser.parse_args()
 
-    print json.dumps(options.__dict__, indent=1)
+    print json.dumps(options.__dict__, indent=1, sort_keys=True)
