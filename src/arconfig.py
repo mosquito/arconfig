@@ -29,9 +29,6 @@ class GenConfigAction(argparse.Action):
     def resolver(self, arg, ns):
         if isinstance(arg, (argparse._HelpAction, argparse._VersionAction, self.__class__, GenConfigAction, LoadConfigAction)):
             pass
-        elif isinstance(arg, (argparse._StoreAction, argparse._StoreConstAction, argparse._StoreTrueAction,
-                              argparse._StoreFalseAction, argparse._CountAction,)):
-            self._config[arg.dest] = self._default_or_value(ns, arg.dest, arg.default)
         elif isinstance(arg, (argparse._AppendAction, argparse._AppendConstAction)):
             if arg.dest not in self._config:
                 self._config[arg.dest] = list()
@@ -43,7 +40,7 @@ class GenConfigAction(argparse.Action):
         elif isinstance(arg, (argparse._SubParsersAction)):
             pass
         else:
-            raise NotImplementedError()
+            self._config[arg.dest] = self._default_or_value(ns, arg.dest, arg.default)
 
 
     def __call__(self, parser, ns, *args, **kwargs):
@@ -52,6 +49,7 @@ class GenConfigAction(argparse.Action):
 
         print json.dumps(self._config, indent=True, encoding='utf-8', sort_keys=True)
         parser.exit()
+
 
 class LoadConfigAction(argparse._StoreAction):
     def __init__(self, option_strings, dest):
