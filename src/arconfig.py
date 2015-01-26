@@ -78,8 +78,6 @@ class LoadConfigAction(argparse._StoreAction):
             else:
                 setattr(namespace, key, val)
 
-        print ""
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
