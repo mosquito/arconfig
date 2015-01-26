@@ -1,9 +1,42 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
 import argparse
 import json
+import sys
 
+def build_config(parser, ns):
+    config = {}
+
+    def default_or_value(ns, dest, default):
+        if hasattr(ns, dest):
+            val = getattr(ns, dest, default)
+            return val if val else default
+        else:
+            return default
+
+    def resolver(arg, ns):
+        if isinstance(arg, (argparse._HelpAction, argparse._VersionAction, GenConfigAction, LoadConfigAction)):
+            pass
+        elif isinstance(arg, (argparse._AppendAction, argparse._AppendConstAction)):
+            if arg.dest not in config:
+                config[arg.dest] = list()
+
+            if isinstance(arg, argparse._AppendConstAction):
+                config[arg.dest].append(arg.const)
+            else:
+                config[arg.dest].append(default_or_value(ns, arg.dest, arg.default))
+        else:
+            config[arg.dest] = default_or_value(ns, arg.dest, arg.default)
+
+    for o in parser._actions:
+        if isinstance(o, argparse._SubParsersAction):
+            config[o.dest] = {}
+            for k, s in o.choices.items():
+                config[o.dest][k] = build_config(s, ns)
+        else:
+            resolver(o, ns)
+
+    return config
 
 class GenConfigAction(argparse.Action):
     def __init__(self, option_strings, dest, default=False, required=False, help=None):
@@ -19,39 +52,14 @@ class GenConfigAction(argparse.Action):
 
         self._config = {}
 
-    def _default_or_value(self, ns, dest, default):
-        if getattr(ns, dest, None):
-            val = getattr(ns, dest)
-            return val if val else default
-        else:
-            return default
-
-    def resolver(self, arg, ns):
-        if isinstance(arg, (argparse._HelpAction, argparse._VersionAction, self.__class__, GenConfigAction, LoadConfigAction)):
-            pass
-        elif isinstance(arg, (argparse._AppendAction, argparse._AppendConstAction)):
-            if arg.dest not in self._config:
-                self._config[arg.dest] = list()
-
-            if isinstance(arg, argparse._AppendConstAction):
-                self._config[arg.dest].append(arg.const)
-            else:
-                self._config[arg.dest].append(self._default_or_value(ns, arg.dest, arg.default))
-        elif isinstance(arg, (argparse._SubParsersAction)):
-            pass
-        else:
-            self._config[arg.dest] = self._default_or_value(ns, arg.dest, arg.default)
-
-
     def __call__(self, parser, ns, *args, **kwargs):
-        for o in parser._actions:
-            self.resolver(o, ns)
-
-        print json.dumps(self._config, indent=True, encoding='utf-8', sort_keys=True)
+        config = build_config(parser, ns)
+        print json.dumps(config, indent=True, encoding='utf-8', sort_keys=True)
         parser.exit()
 
 
 class LoadConfigAction(argparse._StoreAction):
+    ARGV = set(sys.argv[1:])
     def __init__(self, option_strings, dest):
         super(self.__class__, self).__init__(option_strings, dest)
         self.help = "Load configuration from file"
@@ -59,7 +67,18 @@ class LoadConfigAction(argparse._StoreAction):
     def __call__(self, parser, namespace, values, option_string=None):
         cfg = json.load(open(values, "rb"))
         for key, val in cfg.items():
-            setattr(namespace, key, val)
+            if isinstance(val, dict):
+                k = (set(val.keys()) & self.ARGV).pop()
+                try:
+                    for _key, _val in val[k].items():
+                        setattr(namespace, _key, _val)
+                    setattr(namespace, key, k)
+                except KeyError:
+                    pass
+            else:
+                setattr(namespace, key, val)
+
+        print ""
 
 
 if __name__ == "__main__":
