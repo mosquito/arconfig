@@ -20,8 +20,7 @@ def build_config(parser, ns):
         elif isinstance(arg, (argparse._AppendAction, argparse._AppendConstAction)):
             if arg.dest not in config:
                 config[arg.dest] = list()
-
-            if isinstance(arg, argparse._AppendConstAction):
+            elif isinstance(arg, argparse._AppendConstAction):
                 config[arg.dest].append(arg.const)
             else:
                 config[arg.dest].append(default_or_value(ns, arg.dest, arg.default))
