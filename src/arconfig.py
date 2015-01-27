@@ -59,7 +59,7 @@ class GenConfigAction(argparse.Action):
 
 ARGV = set(filter(lambda x: re.match('^[\w\.]+$', x), sys.argv[1:]))
 
-def config_loader(cfg, namespace):
+def config_loader(cfg, namespace, type_map):
     for key, val in cfg.items():
         if isinstance(val, dict):
             try:
@@ -67,12 +67,29 @@ def config_loader(cfg, namespace):
                 if k:
                     _key = k.pop()
                     setattr(namespace, key, _key)
-                    config_loader(val[_key], namespace)
+                    config_loader(val[_key], namespace, type_map[_key])
             except KeyError:
                 pass
         else:
-            setattr(namespace, key, val)
+            setattr(namespace, key, type_map[key](val))
 
+def type_gen(parser, type_map):
+    for action in parser._actions:
+        if isinstance(action, (argparse._HelpAction, argparse._VersionAction, GenConfigAction, LoadConfigAction)):
+            pass
+        elif isinstance(action, (argparse._AppendAction, argparse._AppendConstAction)):
+            type_map[action.dest] = list
+        elif isinstance(action, (argparse._StoreFalseAction, argparse._StoreTrueAction)):
+            type_map[action.dest] = bool
+        elif isinstance(action, (argparse._SubParsersAction,)):
+            for key, parser in action.choices.items():
+                if not action.dest in type_map:
+                    type_map[action.dest] = {}
+                type_map[action.dest][key] = type_gen(parser, dict())
+        else:
+            type_map[action.dest] = action.type if action.type else str
+
+    return type_map
 
 class LoadConfigAction(argparse._StoreAction):
     def __init__(self, option_strings, dest):
@@ -80,7 +97,8 @@ class LoadConfigAction(argparse._StoreAction):
         self.help = "Load configuration from file"
 
     def __call__(self, parser, namespace, values, option_string=None):
-        config_loader(json.load(open(values, "rb")), namespace)
+        type_map = type_gen(parser, dict())
+        config_loader(json.load(open(values, "rb")), namespace, type_map)
         return
 
 
