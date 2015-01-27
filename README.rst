@@ -3,6 +3,8 @@ Arconfig
 
 Save/Load your options to/into config
 
+.. code-block:: pycon
+
 	>>> from arconfig import GenConfigAction, LoadConfigAction
 	>>> parser = argparse.ArgumentParser()
 	>>> parser.add_argument("--config", action=LoadConfigAction) # add it before another options
