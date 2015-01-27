@@ -3,6 +3,7 @@
 import argparse
 import json
 import sys
+import re
 
 def build_config(parser, ns):
     config = {}
@@ -56,26 +57,31 @@ class GenConfigAction(argparse.Action):
         print json.dumps(config, indent=True, encoding='utf-8', sort_keys=True)
         parser.exit()
 
+ARGV = set(filter(lambda x: re.match('^[\w\.]+$', x), sys.argv[1:]))
+
+def config_loader(cfg, namespace):
+    for key, val in cfg.items():
+        if isinstance(val, dict):
+            try:
+                k = (set(val.keys()) & ARGV)
+                if k:
+                    _key = k.pop()
+                    setattr(namespace, key, _key)
+                    config_loader(val[_key], namespace)
+            except KeyError:
+                pass
+        else:
+            setattr(namespace, key, val)
+
 
 class LoadConfigAction(argparse._StoreAction):
-    ARGV = set(sys.argv[1:])
     def __init__(self, option_strings, dest):
         super(self.__class__, self).__init__(option_strings, dest)
         self.help = "Load configuration from file"
 
     def __call__(self, parser, namespace, values, option_string=None):
-        cfg = json.load(open(values, "rb"))
-        for key, val in cfg.items():
-            if isinstance(val, dict):
-                k = (set(val.keys()) & self.ARGV).pop()
-                try:
-                    for _key, _val in val[k].items():
-                        setattr(namespace, _key, _val)
-                    setattr(namespace, key, k)
-                except KeyError:
-                    pass
-            else:
-                setattr(namespace, key, val)
+        config_loader(json.load(open(values, "rb")), namespace)
+        return
 
 
 if __name__ == "__main__":
