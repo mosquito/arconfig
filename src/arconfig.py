@@ -38,6 +38,7 @@ def build_config(parser, ns):
 
     return config
 
+
 class GenConfigAction(argparse.Action):
     def __init__(self, option_strings, dest, default=False, required=False, help=None):
         super(self.__class__, self).__init__(
@@ -57,7 +58,9 @@ class GenConfigAction(argparse.Action):
         print json.dumps(config, indent=True, encoding='utf-8', sort_keys=True)
         parser.exit()
 
+
 ARGV = set(filter(lambda x: re.match('^[\w\.]+$', x), sys.argv[1:]))
+
 
 def config_loader(cfg, namespace, type_map):
     for key, val in cfg.items():
@@ -67,18 +70,20 @@ def config_loader(cfg, namespace, type_map):
                 if k:
                     _key = k.pop()
                     setattr(namespace, key, _key)
-                    config_loader(val[_key], namespace, type_map[_key])
-            except KeyError:
+                    config_loader(val[_key], namespace, type_map[key][_key])
+            except KeyError as e:
                 pass
         else:
-            setattr(namespace, key, type_map[key](val))
+            vtype = type_map.get(key)
+            setattr(namespace, key, vtype(val) if vtype else val)
+
 
 def type_gen(parser, type_map):
     for action in parser._actions:
         if isinstance(action, (argparse._HelpAction, argparse._VersionAction, GenConfigAction, LoadConfigAction)):
             pass
         elif isinstance(action, (argparse._AppendAction, argparse._AppendConstAction)):
-            type_map[action.dest] = list
+            pass
         elif isinstance(action, (argparse._StoreFalseAction, argparse._StoreTrueAction)):
             type_map[action.dest] = bool
         elif isinstance(action, (argparse._SubParsersAction,)):
@@ -90,6 +95,7 @@ def type_gen(parser, type_map):
             type_map[action.dest] = action.type if action.type else str
 
     return type_map
+
 
 class LoadConfigAction(argparse._StoreAction):
     def __init__(self, option_strings, dest):
