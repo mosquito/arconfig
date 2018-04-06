@@ -59,7 +59,7 @@ class GenConfigAction(argparse.Action):
 
     def __call__(self, parser, ns, *args, **kwargs):
         config = build_config(parser, ns)
-        print json.dumps(config, indent=True, encoding='utf-8', sort_keys=True)
+        print(json.dumps(config, indent=True, sort_keys=True))
         parser.exit()
 
 
@@ -148,4 +148,4 @@ if __name__ == "__main__":
 
     options = parser.parse_args()
 
-    print json.dumps(options.__dict__, indent=1, sort_keys=True)
+    print(json.dumps(options.__dict__, indent=1, sort_keys=True))
