@@ -79,7 +79,7 @@ def config_loader(cfg, namespace, type_map):
                     config_loader(val[_key], namespace, type_map[key][_key])
             except KeyError:
                 pass
-        else:
+        elif val is not None:
             vtype = type_map.get(key)
             setattr(namespace, key, vtype(val) if vtype else val)
 
