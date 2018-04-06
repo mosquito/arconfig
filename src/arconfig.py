@@ -12,6 +12,8 @@ def build_config(parser, ns):
     config = {}
 
     def default_or_value(ns, dest, default):
+        if default is argparse.SUPPRESS:
+            default = None
         if hasattr(ns, dest):
             val = getattr(ns, dest, default)
             return val if val else default
