@@ -108,8 +108,8 @@ def type_gen(parser, type_map):
 
 
 class LoadConfigAction(argparse._StoreAction):
-    def __init__(self, option_strings, dest):
-        super(self.__class__, self).__init__(option_strings, dest)
+    def __init__(self, option_strings, dest, **kwargs):
+        super(self.__class__, self).__init__(option_strings, dest, **kwargs)
         self.help = "Load configuration from file"
 
     def __call__(self, parser, namespace, values, option_string=None):
