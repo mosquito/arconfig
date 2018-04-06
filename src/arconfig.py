@@ -112,7 +112,7 @@ class LoadConfigAction(argparse._StoreAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
         type_map = type_gen(parser, dict())
-        config_loader(json.load(open(values, "rb")), namespace, type_map)
+        config_loader(json.load(open(values)), namespace, type_map)
         return
 
 
