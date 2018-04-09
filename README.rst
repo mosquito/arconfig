@@ -3,7 +3,7 @@ Arconfig
 
 Save/Load your options to/into config
 
-.. code-block:: pycon
+.. code-block:: python
 
 	>>> from arconfig import GenConfigAction, LoadConfigAction
 	>>> parser = argparse.ArgumentParser()
@@ -17,7 +17,9 @@ Save/Load your options to/into config
 	>>> parser.add_argument('-f', action='store_false', default=False,
 	... dest='boolean_switch', help='Set a switch to false')
 
-Generate simple config::
+Generate simple config
+
+.. code-block:: json
 
 	$ python script.py --gen-config
 	{
@@ -28,7 +30,9 @@ Generate simple config::
 	}
 
 
-And load it::
+And load it
+
+.. code-block:: json
 
 	$ python argparse_config.py --gen-config > /tmp/test.json
 	$ python argparse_config.py --config=/tmp/test.json
